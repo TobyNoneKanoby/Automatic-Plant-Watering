@@ -1,0 +1,6 @@
+# m h  dom mon dow   command
+*/15 * * * * sh /home/tobias/camera.sh 2>&1
+#@reboot sh /home/tobias/launcher.sh >/home/tobias/logs/cronlog 2>&1
+*/30 * * * * python /home/tobias/fuktmaling.py
+0 8 * * * python /home/tobias/vekstlys_pa.py
+0 23 * * * python /home/tobias/vekstlys_av.py
