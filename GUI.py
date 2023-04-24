@@ -27,9 +27,14 @@ customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard),
 
 i2c_bus = I2C(22)
 addr = 0x38 # bus address
-bus = SMBus(22) # indicates /dev/ic2-22
+bus = SMBus(22) # indicates /dev/ic2-2
 ss1 = Seesaw(i2c_bus, addr=0x36)
 ss2 = Seesaw(i2c_bus, addr=0x37)
+
+
+
+
+
 
 def manuell_motor1():
     bus.write_byte(addr, 0x1)
@@ -50,16 +55,30 @@ def vekstlys_av():
   bus.write_byte(addr, 0x5)
   sleep(0.3)
   bus.write_byte(addr, 0x0)
+  
+def kamera_opp():
+  bus.write_byte(addr, 0x6)
+  #sleep(0.1)
+  bus.write_byte(addr, 0x0)
+  
+def kamera_ned():
+  bus.write_byte(addr, 0x7)
+  #sleep(0.1)
+  bus.write_byte(addr, 0x0)
     
+    
+
 def lukk():
     bus.write_byte(addr, 0x3)
     sys.exit()
 
 
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-   
+        
+     
         
         self.after(100, self.avlesing)
         # configure window
@@ -85,6 +104,8 @@ class App(customtkinter.CTk):
         self.logo_label2.grid(row=1, column=0, padx=10, pady=(10, 10))
         self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, command=self.sidebar_button_event, text="Test Kamera")
         self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
+        #self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, command=self.sidebar_button_event, text="Start Timelapse")
+        #self.sidebar_button_2.grid(row=3, column=0, padx=20, pady=10)
         
         self.sidebar_button_4 = customtkinter.CTkButton(self.sidebar_frame, command=self.plot, text="Plot")
         self.sidebar_button_4.grid(row=3, column=0, padx=20, pady=10)
@@ -104,7 +125,7 @@ class App(customtkinter.CTk):
 
 
         # create tabview
-        self.tabview = customtkinter.CTkTabview(self, width=200, height=300)
+        self.tabview = customtkinter.CTkTabview(self, width=200, height=350)
         self.tabview.grid(row=0, column=1, padx=(20, 0), pady=(10, 0), sticky="nsew")
         self.tabview.add("Status")
         self.tabview.add("Plante 1")
@@ -209,7 +230,7 @@ class App(customtkinter.CTk):
 
         # create slider and progressbar frame
         self.slider_frame = customtkinter.CTkFrame(self, width=50, height=400)
-        self.slider_frame.grid(row=0, column=2, padx=(20, 20), pady=(28, 12), sticky="nsew", rowspan=4)
+        self.slider_frame.grid(row=0, column=2, padx=(20, 20), pady=(28, 0), sticky="nsew")
         self.slider_frame.grid_columnconfigure(5, weight=1)
         self.slider_frame.grid_rowconfigure(4, weight=1)
 
@@ -220,7 +241,7 @@ class App(customtkinter.CTk):
         self.slider_2 = customtkinter.CTkSlider(self.slider_frame, orientation="vertical", command=self.terskel_plante1,
                                                 from_=0,
                                                 to=100,
-                                                width=20, height=420)
+                                                width=20, height=200)
         self.slider_2.grid(row=0, column=0, rowspan=4, padx=(10, 10), pady=(10, 10), sticky="w",)
         self.slider_2_label = customtkinter.CTkLabel(self.slider_frame, text="50", 
                                                   font=customtkinter.CTkFont(size=20, weight="bold"))
@@ -230,7 +251,7 @@ class App(customtkinter.CTk):
         self.slider_3 = customtkinter.CTkSlider(self.slider_frame, orientation="vertical", command=self.terskel_plante2,
                                                 from_=0,
                                                 to=100,
-                                                width=20, height=420)
+                                                width=20, height=200)
         self.slider_3.grid(row=0, column=5, rowspan=4, padx=(10, 10), pady=(10, 10), sticky="e")
         self.slider_2_label2 = customtkinter.CTkLabel(self.slider_frame, text="50", 
                                                   font=customtkinter.CTkFont(size=20, weight="bold"))
@@ -242,6 +263,8 @@ class App(customtkinter.CTk):
                                                    width=90)
         self.slider_frame.overskrift.grid(row=0, column=2, padx=0, pady=(0, 60))
 
+        #self.progressbar_3 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
+        #self.progressbar_3.grid(row=0, column=2, rowspan=5, padx=(10, 20), pady=(10, 10), sticky="ns")
 
         # create scrollable frame
         self.scrollable_frame = customtkinter.CTkScrollableFrame(self, label_text="Planter på plass")
@@ -260,13 +283,42 @@ class App(customtkinter.CTk):
         self.switch3.grid(row=3, column=0, padx=10, pady=(0, 20))
         self.scrollable_frame_switches.append(self.switch3)
 
-
+        # Kamerainnstilling
+        self.kamera_frame = customtkinter.CTkFrame(self, width=100, height=300)
+        self.kamera_frame.grid(row=1, column=2, padx=(20, 20), pady=(20, 10), sticky="nsew")
+        self.kamera_frame.grid_columnconfigure((0,1,2,3,4,5), weight=1)
+        self.kamera_frame.grid_rowconfigure((0,1,2,3,4,5), weight=1)
+        
+        self.kamera_frame_label1 = customtkinter.CTkLabel(self.kamera_frame, text="Kameravinkel",
+                                                   font=customtkinter.CTkFont(size=14, weight="bold"))
+        self.kamera_frame_label1.grid(row=0, column=0, padx=(40,0), pady=10, sticky="n")
+        
+        self.kamera_knapp1= customtkinter.CTkButton(self.kamera_frame, command=kamera_opp, text="Opp")
+        self.kamera_knapp1.grid(row=1, column=0, padx=(40,0), pady=10, sticky="n")
+        self.kamera_knapp2= customtkinter.CTkButton(self.kamera_frame, command=kamera_ned, text="Ned")
+        self.kamera_knapp2.grid(row=2, column=0, padx=(40,0), pady=10, sticky="n")
+        
         # set default values
         self.sidebar_button_3.configure( text="Lukk")
+        #self.checkbox_3.configure(state="disabled")
+        #self.checkbox_1.select()
+        #self.switch1.deselect() #hmm funker ikke
+        #self.scrollable_frame_switches[0].select() #setter plante 1 og 2 som defalut på
+        #self.scrollable_frame_switches[1].select()
+        #self.radio_button_3.configure(state="disabled")
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
         self.optionmenu_1.set("Type plante")
         self.optionmenu_2.set("Type plante")
+
+        #self.combobox_1.set("CTkComboBox")
+        #self.slider_1.configure(command=self.progressbar_2.set)
+        #self.slider_2.configure(command=self.progressbar_3.set)
+        #self.progressbar_1.configure(mode="indeterminnate")
+        #self.progressbar_1.start()
+        #self.textbox.insert("0.0", "CTkTextbox\n\n" + "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\n" * 20)
+        #self.seg_button_1.configure(values=["CTkSegmentedButton", "Value 2", "Value 3"])
+        #self.seg_button_1.set("Value 2")
 
     def open_input_dialog_event(self):
         dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="CTkInputDialog")
